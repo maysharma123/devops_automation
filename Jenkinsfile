@@ -3,37 +3,38 @@ pipeline {
     tools{
         maven 'maven_3_5_0'
     }
-
-    stages {
-        stage('Hello') {
+    stages{
+        stage('Build Maven'){
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/maysharma123/devops_automation.git']])
                 sh 'mvn clean install'
             }
         }
-        stage('Build docker image') {
+        stage('Docker image build'){
             steps {
                 script{
-                    sh 'docker build -t mayanksharma12/devops-integrations .'
-            }
-        }
-    }
-        stage('Deploy container'){
-            steps {
-                script{
-                    sh 'docker run -itd --name test -p 8081:8080 mayanksharma12/devops-integrations'
+                    sh 'docker rm -f $(docker ps -a -q)'
+                    sh 'docker rmi -f $(docker images -a -q)'
+                    sh 'docker build -t mayanksharma12/devops-intergration .'
                 }
             }
         }
-        stage('Push image to hub'){
+        stage('docker container create'){
             steps {
                 script{
-                    withCredentials([string(credentialsId: 'mayanksharma12', variable: 'dockerpwd')]) {
-                    sh 'docker login -u mayanksharma12 -p ${dockerpwd}' 
+                    sh 'docker run -itd --name test -p 8081:8080 mayanksharma12/devops-intergration'
+                }
+            }
+        }
+        stage('Image push dockerhub'){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerpwd')]) {
+                    sh 'docker login -u mayanksharma12 -p ${dockerpwd}'
 }
-                    sh 'docker push mayanksharma12/devops-integrations'
+                    sh 'docker push mayanksharma12/devops-intergration'                    
+                }
             }
         }
     }
-}
 }
