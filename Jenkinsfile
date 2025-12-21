@@ -1,40 +1,41 @@
 pipeline {
     agent any
-    tools{
+    tools {
         maven 'maven_3_5_0'
     }
-    stages{
-        stage('Build Maven'){
+
+     stages {
+        stage('Build Maven') {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/maysharma123/devops_automation.git']])
                 sh 'mvn clean install'
             }
         }
-        stage('Docker image build'){
-            steps {
+        stage('Docker build image'){
+            steps{
                 script{
-                    sh 'docker rm -f $(docker ps -a -q)'
-                    sh 'docker rmi -f $(docker images -a -q)'
-                    sh 'docker build -t mayanksharma12/devops-intergration .'
+                    sh 'docker rm -f $(docker ps -aq)'
+                    sh 'docker rmi -f $(docker images -aq)'
+                    sh 'docker build -t mayanksharma12/devops-intergation .'
                 }
             }
         }
-        stage('docker container create'){
-            steps {
+        stage('docker container creation'){
+            steps{
                 script{
-                    sh 'docker run -itd --name test -p 8081:8080 mayanksharma12/devops-intergration'
+                    sh 'docker run -itd --name con1 -p 8081:8080 mayanksharma12/devops-intergation'
                 }
             }
         }
-        stage('Image push dockerhub'){
+        stage('image push dockerhub'){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'dockerpwd', variable: 'dockerhub')]) {
-                    sh 'docker login -u mayanksharma12 -p ${dockerpwd}'
-}
-                    sh 'docker push mayanksharma12/devops-intergration'                    
+                    sh 'docker login -u mayanksharma12 -p ${dockerhub}'
+                    }
+                    sh 'docker push mayanksharma12/devops-intergation'
                 }
             }
         }
-    }
+     }
 }
