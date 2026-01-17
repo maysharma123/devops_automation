@@ -30,8 +30,8 @@ pipeline {
         stage('image push dockerhub'){
             steps{
                 script{
-                    withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhub')]) {
-                    sh 'docker login -u mayanksharma12 -p ${dockerhub}'
+                    withCredentials([string(credentialsId: 'dockerpwd', variable: 'dockerpwd')]) {
+                    sh 'docker login -u mayanksharma12 -p ${dockerpwd}'
                     }
                     sh 'docker push mayanksharma12/devops-intergation'
                 }
